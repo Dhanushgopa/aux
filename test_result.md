@@ -119,6 +119,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Tested all Product Management API endpoints successfully. GET /api/products returns all products correctly. GET /api/products/featured returns only featured products. GET /api/products/{product_id} returns a single product by ID and handles invalid IDs properly. POST /api/products creates new products with all fields. PUT /api/products/{product_id} updates products correctly and preserves unchanged fields. DELETE /api/products/{product_id} removes products from the database. All endpoints return appropriate status codes and data structures."
+      - working: true
+        agent: "testing"
+        comment: "Tested enhanced Product model with new fields (model_image_url and material_details). All API endpoints correctly handle the new fields. Products can be created and updated with the new fields. GET endpoints return products with the new fields properly structured. The material_details object correctly contains material, gemstones, weight, and origin fields as expected."
 
   - task: "Sample Jewelry Data Initialization"
     implemented: true
@@ -134,6 +137,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Tested POST /api/init-data endpoint successfully. It correctly initializes 8 luxury jewelry products with proper data structure including names, descriptions, prices, categories, and image URLs. The endpoint is idempotent and returns 'Sample data already exists' on subsequent calls, preventing data duplication."
+      - working: true
+        agent: "testing"
+        comment: "Tested enhanced sample data initialization with new fields. All 8 products now include model_image_url and material_details fields. The material_details structure correctly contains material (e.g., 18k Gold, Sterling Silver), gemstones, weight (in grams), and origin information. The endpoint properly updates existing products with new fields if they don't have them and doesn't duplicate data on multiple calls."
 
 frontend:
   - task: "Premium Jewelry Website UI"

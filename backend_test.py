@@ -289,6 +289,124 @@ class PremiumJewelryAPITest(unittest.TestCase):
             self.assertIn(field, contact)
         
         print(f"✅ Successfully retrieved {len(contacts)} contacts")
+        
+    def test_11_enhanced_product_model(self):
+        """Test the enhanced product model with new fields"""
+        print("\n=== Testing Enhanced Product Model ===")
+        
+        # Create a product with the new fields
+        enhanced_product = {
+            "name": "Enhanced Test Diamond Ring",
+            "description": "Luxurious diamond ring with enhanced model details",
+            "price": 3499.99,
+            "category": "Rings",
+            "image_url": "https://images.unsplash.com/photo-1605100804763-247f67b3557e",
+            "model_image_url": "https://images.unsplash.com/photo-1592179828291-4c180eeff32a",
+            "material_details": {
+                "material": "18k Rose Gold",
+                "gemstones": "Premium Diamonds",
+                "weight": "5.2g",
+                "origin": "Italy"
+            },
+            "is_featured": True
+        }
+        
+        # Create the product
+        response = requests.post(
+            f"{self.api_url}/products",
+            json=enhanced_product
+        )
+        self.assertEqual(response.status_code, 200)
+        product = response.json()
+        
+        # Save the created product ID for cleanup in tearDown
+        self.created_product_id = product["id"]
+        
+        # Verify all fields including new ones
+        for key, value in enhanced_product.items():
+            if key == "material_details":
+                self.assertIsInstance(product[key], dict)
+                for detail_key, detail_value in value.items():
+                    self.assertEqual(product[key][detail_key], detail_value)
+            else:
+                self.assertEqual(product[key], value)
+        
+        # Test updating just the material_details
+        update_data = {
+            "material_details": {
+                "material": "18k White Gold",
+                "gemstones": "Natural Diamonds",
+                "weight": "4.8g",
+                "origin": "Switzerland"
+            }
+        }
+        
+        response = requests.put(
+            f"{self.api_url}/products/{product['id']}",
+            json=update_data
+        )
+        self.assertEqual(response.status_code, 200)
+        updated_product = response.json()
+        
+        # Verify only material_details was updated
+        self.assertEqual(updated_product["name"], enhanced_product["name"])
+        self.assertEqual(updated_product["price"], enhanced_product["price"])
+        
+        # Verify the material_details was updated correctly
+        for key, value in update_data["material_details"].items():
+            self.assertEqual(updated_product["material_details"][key], value)
+            
+        print("✅ Enhanced product model testing successful")
+        
+    def test_12_sample_data_update(self):
+        """Test sample data update with new fields"""
+        print("\n=== Testing Sample Data Update ===")
+        
+        # Call init-data endpoint to ensure sample data exists and is updated
+        response = requests.post(f"{self.api_url}/init-data")
+        self.assertEqual(response.status_code, 200)
+        
+        # Get all products to verify they have the new fields
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        
+        # Verify we have at least 8 products
+        self.assertGreaterEqual(len(products), 8, "Expected at least 8 sample products")
+        
+        # Check that all products have the new fields
+        for product in products:
+            self.assertIn("model_image_url", product)
+            self.assertIn("material_details", product)
+            
+            # Verify material_details structure
+            self.assertIsInstance(product["material_details"], dict)
+            material_detail_fields = ["material", "gemstones", "weight", "origin"]
+            for field in material_detail_fields:
+                self.assertIn(field, product["material_details"])
+                
+            # Verify material field contains expected values
+            self.assertIn(product["material_details"]["material"], 
+                         ["18k Gold", "18k Yellow Gold", "18k White Gold", "Sterling Silver", "18k Rose Gold"])
+                
+            # Verify weight field format (should be a string with 'g' suffix)
+            self.assertRegex(product["material_details"]["weight"], r"^\d+\.?\d*g$")
+            
+            # Verify origin field is not empty
+            self.assertTrue(product["material_details"]["origin"], "Origin field should not be empty")
+        
+        # Call init-data again to verify idempotence with new fields
+        response = requests.post(f"{self.api_url}/init-data")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Should indicate data already exists or was updated
+        self.assertTrue(
+            "Sample data already exists" in data["message"] or 
+            "Sample data updated with new fields" in data["message"]
+        )
+        
+        print("✅ Sample data update testing successful")
 
 if __name__ == "__main__":
     print(f"Testing Premium Jewelry API at: {API_URL}")

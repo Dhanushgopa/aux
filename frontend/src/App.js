@@ -69,15 +69,96 @@ const Hero = () => {
   );
 };
 
-// Product Card Component
-const ProductCard = ({ product }) => {
+// Product Details Modal Component
+const ProductDetailsModal = ({ product, isOpen, onClose }) => {
+  if (!isOpen || !product) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>&times;</button>
+        
+        <div className="modal-body">
+          <div className="modal-images">
+            <div className="main-image">
+              <img 
+                src={product.image_url} 
+                alt={product.name} 
+                className="modal-product-image"
+              />
+            </div>
+            <div className="model-image">
+              <img 
+                src={product.model_image_url} 
+                alt={`${product.name} worn by model`} 
+                className="modal-model-image"
+              />
+            </div>
+          </div>
+          
+          <div className="modal-details">
+            <div className="product-header">
+              <h2 className="modal-product-name">{product.name}</h2>
+              <span className="modal-product-category">{product.category}</span>
+              {product.is_featured && (
+                <span className="modal-featured-badge">Featured</span>
+              )}
+            </div>
+            
+            <div className="modal-price">${product.price.toLocaleString()}</div>
+            
+            <div className="product-description-section">
+              <h3>Description</h3>
+              <p>{product.description}</p>
+            </div>
+            
+            <div className="material-details-section">
+              <h3>Material Details</h3>
+              <div className="material-grid">
+                <div className="material-item">
+                  <span className="material-label">Material:</span>
+                  <span className="material-value">{product.material_details?.material || 'N/A'}</span>
+                </div>
+                <div className="material-item">
+                  <span className="material-label">Gemstones:</span>
+                  <span className="material-value">{product.material_details?.gemstones || 'N/A'}</span>
+                </div>
+                <div className="material-item">
+                  <span className="material-label">Weight:</span>
+                  <span className="material-value">{product.material_details?.weight || 'N/A'}</span>
+                </div>
+                <div className="material-item">
+                  <span className="material-label">Origin:</span>
+                  <span className="material-value">{product.material_details?.origin || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-actions">
+              <button className="inquiry-button">Send Inquiry</button>
+              <button className="add-to-cart-button">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Product Card Component with Enhanced Hover Effects
+const ProductCard = ({ product, onViewDetails }) => {
   return (
     <div className="product-card">
       <div className="product-image-container">
         <img 
           src={product.image_url} 
           alt={product.name} 
-          className="product-image"
+          className="product-image product-image-main"
+        />
+        <img 
+          src={product.model_image_url} 
+          alt={`${product.name} worn by model`} 
+          className="product-image product-image-model"
         />
         {product.is_featured && (
           <span className="featured-badge">Featured</span>
@@ -88,14 +169,19 @@ const ProductCard = ({ product }) => {
         <p className="product-category">{product.category}</p>
         <p className="product-description">{product.description}</p>
         <div className="product-price">${product.price.toLocaleString()}</div>
-        <button className="product-button">View Details</button>
+        <button 
+          className="product-button"
+          onClick={() => onViewDetails(product)}
+        >
+          View Details
+        </button>
       </div>
     </div>
   );
 };
 
 // Home Page Component
-const HomePage = ({ featuredProducts }) => {
+const HomePage = ({ featuredProducts, onViewDetails }) => {
   return (
     <div className="page">
       <Hero />
@@ -106,7 +192,11 @@ const HomePage = ({ featuredProducts }) => {
           <p className="section-subtitle">Handpicked pieces that embody luxury and craftsmanship</p>
           <div className="products-grid">
             {featuredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onViewDetails={onViewDetails}
+              />
             ))}
           </div>
         </div>
@@ -129,7 +219,7 @@ const HomePage = ({ featuredProducts }) => {
 };
 
 // Products Page Component
-const ProductsPage = ({ products }) => {
+const ProductsPage = ({ products, onViewDetails }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const categories = ['All', ...new Set(products.map(p => p.category))];
   
@@ -156,7 +246,11 @@ const ProductsPage = ({ products }) => {
         
         <div className="products-grid">
           {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onViewDetails={onViewDetails}
+            />
           ))}
         </div>
       </div>
@@ -350,6 +444,18 @@ function App() {
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewDetails = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -387,15 +493,15 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage featuredProducts={featuredProducts} />;
+        return <HomePage featuredProducts={featuredProducts} onViewDetails={handleViewDetails} />;
       case 'products':
-        return <ProductsPage products={products} />;
+        return <ProductsPage products={products} onViewDetails={handleViewDetails} />;
       case 'about':
         return <AboutPage />;
       case 'contact':
         return <ContactPage />;
       default:
-        return <HomePage featuredProducts={featuredProducts} />;
+        return <HomePage featuredProducts={featuredProducts} onViewDetails={handleViewDetails} />;
     }
   };
 
@@ -403,6 +509,11 @@ function App() {
     <div className="App">
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
       {renderPage()}
+      <ProductDetailsModal 
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </div>
   );
 }

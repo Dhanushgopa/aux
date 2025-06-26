@@ -103,9 +103,15 @@ class PremiumJewelryAPITest(unittest.TestCase):
         
         # Verify product structure
         product = products[0]
-        required_fields = ["id", "name", "description", "price", "category", "image_url", "is_featured"]
+        required_fields = ["id", "name", "description", "price", "category", "image_url", "model_image_url", "material_details", "is_featured"]
         for field in required_fields:
             self.assertIn(field, product)
+        
+        # Verify material_details structure
+        self.assertIsInstance(product["material_details"], dict)
+        material_detail_fields = ["material", "gemstones", "weight", "origin"]
+        for field in material_detail_fields:
+            self.assertIn(field, product["material_details"])
         
         print(f"✅ Successfully retrieved {len(products)} products")
     

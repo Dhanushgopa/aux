@@ -33,6 +33,13 @@ class PremiumJewelryAPITest(unittest.TestCase):
             "price": 1999.99,
             "category": "Bracelets",
             "image_url": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f",
+            "model_image_url": "https://images.unsplash.com/photo-1655693487677-683764e20c08",
+            "material_details": {
+                "material": "18k White Gold",
+                "gemstones": "Natural Diamonds",
+                "weight": "4.5g",
+                "origin": "Switzerland"
+            },
             "is_featured": True
         }
         self.test_contact = {

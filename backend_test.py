@@ -147,6 +147,16 @@ class PremiumJewelryAPITest(unittest.TestCase):
         product = response.json()
         self.assertEqual(product["id"], product_id)
         
+        # Verify the product has the new fields
+        self.assertIn("model_image_url", product)
+        self.assertIn("material_details", product)
+        self.assertIsInstance(product["material_details"], dict)
+        
+        # Verify material_details structure
+        material_detail_fields = ["material", "gemstones", "weight", "origin"]
+        for field in material_detail_fields:
+            self.assertIn(field, product["material_details"])
+        
         # Test invalid product ID
         invalid_id = str(uuid.uuid4())
         response = requests.get(f"{self.api_url}/products/{invalid_id}")

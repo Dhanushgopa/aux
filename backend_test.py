@@ -126,6 +126,16 @@ class PremiumJewelryAPITest(unittest.TestCase):
         # Verify all returned products are featured
         for product in products:
             self.assertTrue(product["is_featured"], f"Product {product['id']} is not featured")
+            
+            # Verify each featured product has the new fields
+            self.assertIn("model_image_url", product)
+            self.assertIn("material_details", product)
+            self.assertIsInstance(product["material_details"], dict)
+            
+            # Verify material_details structure
+            material_detail_fields = ["material", "gemstones", "weight", "origin"]
+            for field in material_detail_fields:
+                self.assertIn(field, product["material_details"])
         
         print(f"✅ Successfully retrieved {len(products)} featured products")
     

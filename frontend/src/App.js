@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Fix for environment variable not loading properly
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 const API = `${BACKEND_URL}/api`;
+console.log('Using backend URL:', BACKEND_URL);
 
 // Header Component
 const Header = ({ currentPage, setCurrentPage }) => {

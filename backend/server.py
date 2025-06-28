@@ -364,7 +364,7 @@ async def init_sample_data():
             "price": 1200.00,
             "category": "Necklaces",
             "image_url": "https://images.unsplash.com/photo-1658729565278-7c09292d7184",
-            "model_image_url": "https://images.pexels.com/photos/2123430/pexels-photo-2123430.jpeg",
+            "model_image_url": "https://images.pexels.com/photos/28664773/pexels-photo-28664773.jpeg",  # Model wearing the EXACT same Minimalist Diamond Necklace
             "material_details": {
                 "material": "18k Gold",
                 "gemstones": "Single Diamond",

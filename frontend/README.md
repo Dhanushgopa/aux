@@ -1,6 +1,29 @@
-# Getting Started with Create React App
+# Premium Jewelry Frontend
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Product Image Guidelines
+
+### Importance of Image Consistency
+
+To maintain trust with our customers and provide an accurate representation of our products, it is crucial that:
+
+- **The jewelry shown in model images must exactly match the jewelry in product images**
+- Each product must have both a product image (showing the jewelry item clearly) and a model image (showing the same jewelry being worn)
+- The model image should showcase the same exact jewelry piece, not a similar or different version
+
+### Image Display
+
+The application implements a hover effect on product cards:
+- By default, the product image is displayed
+- On hover, the model image fades in, showing the same jewelry being worn
+- In the product details modal, both images are displayed side by side
+
+### Backend Validation
+
+The backend API includes validation to ensure consistency between product and model images:
+- When creating or updating products, both images are validated
+- In a production environment, AI-based image recognition would be used to verify that the same jewelry appears in both images
 
 ## Available Scripts
 

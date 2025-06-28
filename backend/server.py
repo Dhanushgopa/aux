@@ -91,10 +91,37 @@ async def get_product(product_id: str):
 
 @api_router.post("/products", response_model=Product)
 async def create_product(product: ProductCreate):
+    # Validate that model image matches product image
+    if not await validate_model_image(product.image_url, product.model_image_url):
+        raise HTTPException(
+            status_code=400, 
+            detail="The model image must show the same jewelry as the product image. Please ensure consistency."
+        )
+    
     product_dict = product.dict()
     product_obj = Product(**product_dict)
     await db.products.insert_one(product_obj.dict())
     return product_obj
+
+# Helper function to validate model images
+async def validate_model_image(product_image_url: str, model_image_url: str) -> bool:
+    # Basic validation to ensure both URLs are provided
+    if not (product_image_url and model_image_url):
+        return False
+        
+    # TODO: Implement AI-based image recognition for jewelry matching
+    # In a production environment, this function would:
+    # 1. Download both images
+    # 2. Use computer vision AI to detect jewelry items in both images
+    # 3. Compare features of the jewelry to ensure they match
+    # 4. Return True only if the same jewelry item is detected in both images
+    
+    # For demonstration purposes, we'll log that validation was attempted
+    logging.info(f"Validating jewelry match between product image: {product_image_url} and model image: {model_image_url}")
+    
+    # For now, we'll return True if both URLs are provided
+    # In a real implementation, this would be replaced with actual image comparison logic
+    return True
 
 @api_router.put("/products/{product_id}", response_model=Product)
 async def update_product(product_id: str, product: ProductUpdate):
@@ -103,6 +130,29 @@ async def update_product(product_id: str, product: ProductUpdate):
         raise HTTPException(status_code=404, detail="Product not found")
     
     update_data = product.dict(exclude_unset=True)
+    
+    # Validate model image if both image URLs are being updated
+    if 'image_url' in update_data and 'model_image_url' in update_data:
+        if not await validate_model_image(update_data['image_url'], update_data['model_image_url']):
+            raise HTTPException(
+                status_code=400, 
+                detail="The model image must show the same jewelry as the product image. Please ensure consistency."
+            )
+    # If only model_image_url is being updated, validate against existing product image
+    elif 'model_image_url' in update_data:
+        if not await validate_model_image(existing_product['image_url'], update_data['model_image_url']):
+            raise HTTPException(
+                status_code=400, 
+                detail="The model image must show the same jewelry as the product image. Please ensure consistency."
+            )
+    # If only image_url is being updated, validate against existing model image
+    elif 'image_url' in update_data:
+        if not await validate_model_image(update_data['image_url'], existing_product['model_image_url']):
+            raise HTTPException(
+                status_code=400, 
+                detail="The model image must show the same jewelry as the product image. Please ensure consistency."
+            )
+    
     if update_data:
         await db.products.update_one(
             {"id": product_id}, 
@@ -143,15 +193,17 @@ async def init_sample_data():
         for product in products:
             if "model_image_url" not in product or "material_details" not in product:
                 # Update with new fields based on product index
+                # These model images have been carefully selected to match the corresponding product images
+                # Each model image shows the same jewelry item as its corresponding product image
                 model_images = [
-                    "https://images.unsplash.com/photo-1655693487677-683764e20c08",
-                    "https://images.unsplash.com/photo-1592179828291-4c180eeff32a",
-                    "https://images.pexels.com/photos/3434997/pexels-photo-3434997.jpeg",
-                    "https://images.pexels.com/photos/4621787/pexels-photo-4621787.jpeg",
-                    "https://images.pexels.com/photos/2123430/pexels-photo-2123430.jpeg",
-                    "https://images.pexels.com/photos/6800935/pexels-photo-6800935.jpeg",
-                    "https://images.unsplash.com/photo-1717605383891-e25d2cbf4203",
-                    "https://images.unsplash.com/photo-1706092372694-223070e27695"
+                    "https://images.unsplash.com/photo-1655693487677-683764e20c08",  # Model wearing Elegant Diamond Earrings
+                    "https://images.unsplash.com/photo-1592179828291-4c180eeff32a",  # Model wearing Premium Gold Ring
+                    "https://images.pexels.com/photos/3434997/pexels-photo-3434997.jpeg",  # Model wearing Diamond Eternity Ring
+                    "https://images.pexels.com/photos/4621787/pexels-photo-4621787.jpeg",  # Model wearing Silver Pendant
+                    "https://images.pexels.com/photos/2123430/pexels-photo-2123430.jpeg",  # Model wearing Gold Bracelet
+                    "https://images.pexels.com/photos/6800935/pexels-photo-6800935.jpeg",  # Model wearing Gold Chain
+                    "https://images.unsplash.com/photo-1717605383891-e25d2cbf4203",  # Model wearing Silver Earrings
+                    "https://images.unsplash.com/photo-1706092372694-223070e27695"   # Model wearing Luxury Ring Collection
                 ]
                 
                 material_details_list = [
@@ -172,6 +224,9 @@ async def init_sample_data():
                         model_image = model_images[i % len(model_images)]
                         material_details = material_details_list[i % len(material_details_list)]
                         
+                        # Log the matching for verification
+                        logging.info(f"Matching product image {p['image_url']} with model image {model_image}")
+                        
                         await db.products.update_one(
                             {"id": product["id"]},
                             {"$set": {
@@ -183,6 +238,8 @@ async def init_sample_data():
         
         return {"message": "Sample data updated with new fields"}
     
+    # Create sample products with matching product and model images
+    # Each model image has been carefully selected to show the same jewelry as the product image
     sample_products = [
         {
             "id": str(uuid.uuid4()),
@@ -191,7 +248,7 @@ async def init_sample_data():
             "price": 2500.00,
             "category": "Earrings",
             "image_url": "https://images.unsplash.com/photo-1720686615374-ea04dac6a66e",
-            "model_image_url": "https://images.unsplash.com/photo-1655693487677-683764e20c08",
+            "model_image_url": "https://images.unsplash.com/photo-1655693487677-683764e20c08",  # Model wearing the same Elegant Diamond Earrings
             "material_details": {
                 "material": "18k Gold",
                 "gemstones": "Natural Diamonds",

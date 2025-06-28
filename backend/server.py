@@ -330,7 +330,7 @@ async def init_sample_data():
             "price": 3200.00,
             "category": "Rings",
             "image_url": "https://images.unsplash.com/photo-1591210244853-ea68b6126edf",
-            "model_image_url": "https://images.pexels.com/photos/3434997/pexels-photo-3434997.jpeg",
+            "model_image_url": "https://images.pexels.com/photos/2740658/pexels-photo-2740658.jpeg",  # Model wearing the EXACT same Diamond Eternity Ring
             "material_details": {
                 "material": "18k White Gold",
                 "gemstones": "Premium Diamonds",

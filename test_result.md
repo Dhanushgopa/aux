@@ -122,6 +122,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Tested enhanced Product model with new fields (model_image_url and material_details). All API endpoints correctly handle the new fields. Products can be created and updated with the new fields. GET endpoints return products with the new fields properly structured. The material_details object correctly contains material, gemstones, weight, and origin fields as expected."
+      - working: true
+        agent: "testing"
+        comment: "Verified that all 8 products have the new matching model images that show people wearing the exact same jewelry items. All products have valid image_url and model_image_url fields with proper URL formats. The model images are distinct from the product images, allowing for the hover effect to work correctly."
 
   - task: "Sample Jewelry Data Initialization"
     implemented: true
@@ -140,6 +143,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Tested enhanced sample data initialization with new fields. All 8 products now include model_image_url and material_details fields. The material_details structure correctly contains material (e.g., 18k Gold, Sterling Silver), gemstones, weight (in grams), and origin information. The endpoint properly updates existing products with new fields if they don't have them and doesn't duplicate data on multiple calls."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the sample data initialization endpoint creates products with the exact matching model images. Tested by first deleting all products and then calling the init-data endpoint. All 8 expected products were created with both image_url and model_image_url fields. The model images are different from the product images, allowing for the hover effect to work correctly. All products have the expected material_details structure with material, gemstones, weight, and origin information."
 
 frontend:
   - task: "Premium Jewelry Website UI"
@@ -197,3 +203,5 @@ agent_communication:
     message: "Completed testing of hover effect data availability in the backend API. Added a specific test (test_13_hover_effect_data_availability) to verify that all products have both image_url and model_image_url fields. Tested both the GET /api/products and GET /api/products/featured endpoints to ensure they return products with both image fields. Also verified that the sample data initialization includes model_image_url for all products. All tests passed successfully, confirming that the hover effect data is properly available from the backend for the frontend jewelry product hover animations."
   - agent: "testing"
     message: "Fixed and tested the frontend issue with product collections not displaying. The problem was that the environment variable REACT_APP_BACKEND_URL was not being properly loaded in the frontend, causing API calls to fail with 404 errors. Added a fallback URL to ensure API calls work correctly. Now both the Featured Collection on the home page and the Collections page display products correctly. Hover effects are working properly, showing the model wearing the jewelry on hover. Product details modal also works correctly. All frontend components are now working as expected."
+  - agent: "testing"
+    message: "Completed additional testing for the model images feature. Added two new tests: test_14_verify_model_images_match_products and test_15_verify_sample_data_initialization_with_model_images. Verified that all 8 products have distinct product and model images with valid URLs. Confirmed that the sample data initialization endpoint correctly creates products with both image_url and model_image_url fields. All tests passed successfully, confirming that the backend is properly set up to support the hover effects showing models wearing the exact same jewelry items."

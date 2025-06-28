@@ -398,7 +398,7 @@ async def init_sample_data():
             "price": 650.00,
             "category": "Rings",
             "image_url": "https://images.unsplash.com/photo-1593554466439-3c9978dd302c",
-            "model_image_url": "https://images.unsplash.com/photo-1717605383891-e25d2cbf4203",
+            "model_image_url": "https://images.unsplash.com/photo-1558882257-af20d5828286",  # Model wearing the EXACT same Classic Silver Ring
             "material_details": {
                 "material": "Sterling Silver",
                 "gemstones": "None",

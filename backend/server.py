@@ -233,61 +233,11 @@ async def init_sample_data():
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
     
-    # Check if data already exists
-    existing_count = await db.products.count_documents({})
-    if existing_count > 0:
-        # Update existing products with new fields if they don't have them
-        products = await db.products.find().to_list(1000)
-        for product in products:
-            if "model_image_url" not in product or "material_details" not in product:
-                # Update with new fields based on product index
-                # These model images have been carefully selected to match the corresponding product images
-                # Each model image shows the EXACT same jewelry item as its corresponding product image
-                model_images = [
-                    "https://images.unsplash.com/photo-1616121341778-0dd435d03d23",  # Model wearing Elegant Diamond Earrings (small diamond studs)
-                    "https://images.pexels.com/photos/7631686/pexels-photo-7631686.jpeg",  # Model wearing Premium Gold Ring (classic gold band)
-                    "https://images.pexels.com/photos/2740658/pexels-photo-2740658.jpeg",  # Model wearing Diamond Eternity Ring (diamond band ring)
-                    "https://images.pexels.com/photos/6153885/pexels-photo-6153885.jpeg",  # Model wearing Heart Pendant Necklace (silver heart necklace)
-                    "https://images.pexels.com/photos/28664773/pexels-photo-28664773.jpeg",  # Model wearing Minimalist Diamond Necklace (single diamond pendant)
-                    "https://images.unsplash.com/photo-1623726564529-f07ede3b34be",  # Model wearing Wedding Ring Set (matching gold wedding bands)
-                    "https://images.unsplash.com/photo-1558882257-af20d5828286",  # Model wearing Classic Silver Ring (simple silver band)
-                    "https://images.pexels.com/photos/16971727/pexels-photo-16971727.jpeg"   # Model wearing Luxury Ring Collection (ornate rings with gems)
-                ]
-                
-                material_details_list = [
-                    {"material": "18k Gold", "gemstones": "Natural Diamonds", "weight": "3.2g", "origin": "Switzerland"},
-                    {"material": "18k Yellow Gold", "gemstones": "None", "weight": "5.8g", "origin": "Italy"},
-                    {"material": "18k White Gold", "gemstones": "Premium Diamonds", "weight": "4.1g", "origin": "Belgium"},
-                    {"material": "Sterling Silver", "gemstones": "None", "weight": "2.3g", "origin": "United Kingdom"},
-                    {"material": "18k Gold", "gemstones": "Single Diamond", "weight": "1.8g", "origin": "France"},
-                    {"material": "18k Gold", "gemstones": "None", "weight": "12.5g", "origin": "Italy"},
-                    {"material": "Sterling Silver", "gemstones": "None", "weight": "3.7g", "origin": "Denmark"},
-                    {"material": "18k Gold", "gemstones": "Sapphires & Diamonds", "weight": "8.9g", "origin": "Switzerland"}
-                ]
-                
-                # Find index based on existing products
-                products_list = await db.products.find().to_list(1000)
-                for i, p in enumerate(products_list):
-                    if p["id"] == product["id"]:
-                        model_image = model_images[i % len(model_images)]
-                        material_details = material_details_list[i % len(material_details_list)]
-                        
-                        # Log the matching for verification
-                        logging.info(f"Matching product image {p['image_url']} with model image {model_image}")
-                        
-                        await db.products.update_one(
-                            {"id": product["id"]},
-                            {"$set": {
-                                "model_image_url": model_image,
-                                "material_details": material_details
-                            }}
-                        )
-                        break
-        
-        return {"message": "Sample data updated with new fields"}
+    # Clear existing products first to ensure fresh data
+    await db.products.delete_many({})
     
     # Create sample products with matching product and model images
-    # Each model image has been carefully selected to show the same jewelry as the product image
+    # Each model image has been carefully selected to show the EXACT same jewelry as the product image
     sample_products = [
         {
             "id": str(uuid.uuid4()),

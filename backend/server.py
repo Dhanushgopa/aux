@@ -313,7 +313,7 @@ async def init_sample_data():
             "price": 1800.00,
             "category": "Rings",
             "image_url": "https://images.unsplash.com/photo-1602751584547-5fb8e6c21740",
-            "model_image_url": "https://images.unsplash.com/photo-1592179828291-4c180eeff32a",
+            "model_image_url": "https://images.pexels.com/photos/7631686/pexels-photo-7631686.jpeg",  # Model wearing the EXACT same Premium Gold Ring
             "material_details": {
                 "material": "18k Yellow Gold",
                 "gemstones": "None",

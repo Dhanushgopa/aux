@@ -535,6 +535,76 @@ class PremiumJewelryAPITest(unittest.TestCase):
                        f"Not all expected categories are present. Found: {categories}")
         
         print("✅ Model images verification successful")
+        
+    def test_15_verify_sample_data_initialization_with_model_images(self):
+        """Test that sample data initialization creates products with matching model images"""
+        print("\n=== Testing Sample Data Initialization with Model Images ===")
+        
+        # First, delete all existing products to ensure clean state
+        # Get all products
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        
+        # Delete each product
+        for product in products:
+            requests.delete(f"{self.api_url}/products/{product['id']}")
+        
+        # Verify all products are deleted
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        self.assertEqual(len(products), 0, "Failed to delete all products")
+        
+        # Now initialize sample data
+        response = requests.post(f"{self.api_url}/init-data")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["message"], "Sample data initialized successfully")
+        
+        # Get all products again
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        
+        # Verify we have exactly 8 products
+        self.assertEqual(len(products), 8, "Expected exactly 8 sample products after initialization")
+        
+        # Verify each product has both image fields
+        for product in products:
+            self.assertIn("image_url", product)
+            self.assertIn("model_image_url", product)
+            self.assertTrue(product["image_url"], f"Product {product['name']} has empty image_url")
+            self.assertTrue(product["model_image_url"], f"Product {product['name']} has empty model_image_url")
+            
+            # Verify the model image is different from the product image
+            self.assertNotEqual(product["image_url"], product["model_image_url"], 
+                              f"Product and model images are identical for {product['name']}")
+            
+            # Verify material_details is present and has the expected structure
+            self.assertIn("material_details", product)
+            self.assertIsInstance(product["material_details"], dict)
+            material_detail_fields = ["material", "gemstones", "weight", "origin"]
+            for field in material_detail_fields:
+                self.assertIn(field, product["material_details"])
+        
+        # Check specific products to ensure they match the expected sample data
+        product_names = [p["name"] for p in products]
+        expected_names = [
+            "Elegant Diamond Earrings",
+            "Premium Gold Ring",
+            "Diamond Eternity Ring",
+            "Heart Pendant Necklace",
+            "Minimalist Diamond Necklace",
+            "Wedding Ring Set",
+            "Classic Silver Ring",
+            "Luxury Ring Collection"
+        ]
+        
+        for name in expected_names:
+            self.assertIn(name, product_names, f"Expected product '{name}' not found in sample data")
+        
+        print("✅ Sample data initialization with model images successful")
 
 if __name__ == "__main__":
     print(f"Testing Premium Jewelry API at: {API_URL}")

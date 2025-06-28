@@ -9,14 +9,38 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
 from datetime import datetime
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection with retry logic
+async def connect_to_mongo():
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+            client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=5000)
+            # Test the connection
+            await client.admin.command('ping')
+            db = client[os.environ.get('DB_NAME', 'premium_jewelry')]
+            logging.info(f"Successfully connected to MongoDB at {mongo_url}")
+            return client, db
+        except Exception as e:
+            logging.warning(f"MongoDB connection attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                logging.info(f"Retrying in {retry_delay} seconds...")
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2
+            else:
+                logging.error("Failed to connect to MongoDB after all retries")
+                raise
+
+# Initialize MongoDB connection
+client = None
+db = None
 
 # Create the main app without a prefix
 app = FastAPI(title="Premium Jewelry API", description="Luxury jewelry store backend")
@@ -74,16 +98,22 @@ class ContactCreate(BaseModel):
 # Product Routes
 @api_router.get("/products", response_model=List[Product])
 async def get_products():
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
     products = await db.products.find().to_list(1000)
     return [Product(**product) for product in products]
 
 @api_router.get("/products/featured", response_model=List[Product])
 async def get_featured_products():
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
     products = await db.products.find({"is_featured": True}).to_list(1000)
     return [Product(**product) for product in products]
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
     product = await db.products.find_one({"id": product_id})
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -91,6 +121,9 @@ async def get_product(product_id: str):
 
 @api_router.post("/products", response_model=Product)
 async def create_product(product: ProductCreate):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     # Validate that model image matches product image
     if not await validate_model_image(product.image_url, product.model_image_url):
         raise HTTPException(
@@ -125,6 +158,9 @@ async def validate_model_image(product_image_url: str, model_image_url: str) -> 
 
 @api_router.put("/products/{product_id}", response_model=Product)
 async def update_product(product_id: str, product: ProductUpdate):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     existing_product = await db.products.find_one({"id": product_id})
     if existing_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -164,6 +200,9 @@ async def update_product(product_id: str, product: ProductUpdate):
 
 @api_router.delete("/products/{product_id}")
 async def delete_product(product_id: str):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     result = await db.products.delete_one({"id": product_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -172,6 +211,9 @@ async def delete_product(product_id: str):
 # Contact Routes
 @api_router.post("/contact", response_model=Contact)
 async def create_contact(contact: ContactCreate):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     contact_dict = contact.dict()
     contact_obj = Contact(**contact_dict)
     await db.contacts.insert_one(contact_obj.dict())
@@ -179,12 +221,18 @@ async def create_contact(contact: ContactCreate):
 
 @api_router.get("/contacts", response_model=List[Contact])
 async def get_contacts():
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     contacts = await db.contacts.find().to_list(1000)
     return [Contact(**contact) for contact in contacts]
 
 # Initialize sample data
 @api_router.post("/init-data")
 async def init_sample_data():
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+    
     # Check if data already exists
     existing_count = await db.products.count_documents({})
     if existing_count > 0:
@@ -385,7 +433,12 @@ async def init_sample_data():
 # Health check
 @api_router.get("/")
 async def root():
-    return {"message": "Premium Jewelry API is running"}
+    mongo_status = "connected" if db is not None else "disconnected"
+    return {
+        "message": "Premium Jewelry API is running",
+        "mongodb_status": mongo_status,
+        "database": os.environ.get('DB_NAME', 'premium_jewelry')
+    }
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -405,6 +458,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    global client, db
+    try:
+        client, db = await connect_to_mongo()
+        logger.info("Database connection established successfully")
+    except Exception as e:
+        logger.error(f"Failed to connect to database: {e}")
+        # Don't exit, let the app start but with db = None
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client:
+        client.close()
+        logger.info("Database connection closed")

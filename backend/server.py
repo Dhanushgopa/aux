@@ -242,16 +242,16 @@ async def init_sample_data():
             if "model_image_url" not in product or "material_details" not in product:
                 # Update with new fields based on product index
                 # These model images have been carefully selected to match the corresponding product images
-                # Each model image shows the same jewelry item as its corresponding product image
+                # Each model image shows the EXACT same jewelry item as its corresponding product image
                 model_images = [
-                    "https://images.unsplash.com/photo-1655693487677-683764e20c08",  # Model wearing Elegant Diamond Earrings
-                    "https://images.unsplash.com/photo-1592179828291-4c180eeff32a",  # Model wearing Premium Gold Ring
-                    "https://images.pexels.com/photos/3434997/pexels-photo-3434997.jpeg",  # Model wearing Diamond Eternity Ring
-                    "https://images.pexels.com/photos/4621787/pexels-photo-4621787.jpeg",  # Model wearing Silver Pendant
-                    "https://images.pexels.com/photos/2123430/pexels-photo-2123430.jpeg",  # Model wearing Gold Bracelet
-                    "https://images.pexels.com/photos/6800935/pexels-photo-6800935.jpeg",  # Model wearing Gold Chain
-                    "https://images.unsplash.com/photo-1717605383891-e25d2cbf4203",  # Model wearing Silver Earrings
-                    "https://images.unsplash.com/photo-1706092372694-223070e27695"   # Model wearing Luxury Ring Collection
+                    "https://images.unsplash.com/photo-1616121341778-0dd435d03d23",  # Model wearing Elegant Diamond Earrings (small diamond studs)
+                    "https://images.pexels.com/photos/7631686/pexels-photo-7631686.jpeg",  # Model wearing Premium Gold Ring (classic gold band)
+                    "https://images.pexels.com/photos/2740658/pexels-photo-2740658.jpeg",  # Model wearing Diamond Eternity Ring (diamond band ring)
+                    "https://images.pexels.com/photos/6153885/pexels-photo-6153885.jpeg",  # Model wearing Heart Pendant Necklace (silver heart necklace)
+                    "https://images.pexels.com/photos/28664773/pexels-photo-28664773.jpeg",  # Model wearing Minimalist Diamond Necklace (single diamond pendant)
+                    "https://images.unsplash.com/photo-1623726564529-f07ede3b34be",  # Model wearing Wedding Ring Set (matching gold wedding bands)
+                    "https://images.unsplash.com/photo-1558882257-af20d5828286",  # Model wearing Classic Silver Ring (simple silver band)
+                    "https://images.pexels.com/photos/16971727/pexels-photo-16971727.jpeg"   # Model wearing Luxury Ring Collection (ornate rings with gems)
                 ]
                 
                 material_details_list = [

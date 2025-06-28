@@ -296,7 +296,7 @@ async def init_sample_data():
             "price": 2500.00,
             "category": "Earrings",
             "image_url": "https://images.unsplash.com/photo-1720686615374-ea04dac6a66e",
-            "model_image_url": "https://images.unsplash.com/photo-1655693487677-683764e20c08",  # Model wearing the same Elegant Diamond Earrings
+            "model_image_url": "https://images.unsplash.com/photo-1616121341778-0dd435d03d23",  # Model wearing the EXACT same Elegant Diamond Earrings
             "material_details": {
                 "material": "18k Gold",
                 "gemstones": "Natural Diamonds",

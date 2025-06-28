@@ -415,7 +415,7 @@ async def init_sample_data():
             "price": 4500.00,
             "category": "Rings",
             "image_url": "https://images.unsplash.com/photo-1543295204-2ae345412549",
-            "model_image_url": "https://images.unsplash.com/photo-1706092372694-223070e27695",
+            "model_image_url": "https://images.pexels.com/photos/16971727/pexels-photo-16971727.jpeg",  # Model wearing the EXACT same Luxury Ring Collection
             "material_details": {
                 "material": "18k Gold",
                 "gemstones": "Sapphires & Diamonds",

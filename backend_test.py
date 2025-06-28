@@ -494,6 +494,48 @@ class PremiumJewelryAPITest(unittest.TestCase):
         
         print(f"✅ All {len(products)} sample products have model_image_url field")
 
+    def test_14_verify_model_images_match_products(self):
+        """Test that all products have matching model images showing the exact same jewelry items"""
+        print("\n=== Testing Model Images Match Products ===")
+        
+        # Get all products
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        self.assertGreaterEqual(len(products), 8, "Expected at least 8 products")
+        
+        # Verify each product has a matching model image
+        for product in products:
+            self.assertIn("image_url", product)
+            self.assertIn("model_image_url", product)
+            
+            # Verify both image URLs are valid
+            self.assertTrue(product["image_url"].startswith("http"))
+            self.assertTrue(product["model_image_url"].startswith("http"))
+            
+            # Print the product name and both image URLs for verification
+            print(f"Product: {product['name']}")
+            print(f"  Product Image: {product['image_url']}")
+            print(f"  Model Image: {product['model_image_url']}")
+            
+            # Verify the model image is different from the product image
+            # (since we expect one to be the product alone and one to be a model wearing it)
+            self.assertNotEqual(product["image_url"], product["model_image_url"], 
+                              f"Product and model images are identical for {product['name']}")
+        
+        print(f"✅ All {len(products)} products have distinct product and model images")
+        
+        # Verify the sample data has the expected number of products
+        self.assertEqual(len(products), 8, "Expected exactly 8 sample products")
+        
+        # Verify the expected categories are present
+        categories = set(product["category"] for product in products)
+        expected_categories = {"Rings", "Necklaces", "Earrings", "Wedding Rings"}
+        self.assertTrue(expected_categories.issubset(categories), 
+                       f"Not all expected categories are present. Found: {categories}")
+        
+        print("✅ Model images verification successful")
+
 if __name__ == "__main__":
     print(f"Testing Premium Jewelry API at: {API_URL}")
     unittest.main(argv=['first-arg-is-ignored'], exit=False)

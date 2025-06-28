@@ -428,6 +428,72 @@ class PremiumJewelryAPITest(unittest.TestCase):
         
         print("✅ Sample data update testing successful")
 
+    def test_13_hover_effect_data_availability(self):
+        """Test specifically for hover effect data availability in products"""
+        print("\n=== Testing Hover Effect Data Availability ===")
+        
+        # Test GET /api/products endpoint
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        self.assertGreater(len(products), 0, "No products found")
+        
+        # Verify all products have both image fields
+        for product in products:
+            self.assertIn("image_url", product, f"Product {product['id']} missing image_url field")
+            self.assertIn("model_image_url", product, f"Product {product['id']} missing model_image_url field")
+            
+            # Verify image URLs are not empty
+            self.assertTrue(product["image_url"], f"Product {product['id']} has empty image_url")
+            self.assertTrue(product["model_image_url"], f"Product {product['id']} has empty model_image_url")
+            
+            # Verify image URLs are valid URLs
+            self.assertTrue(product["image_url"].startswith("http"), 
+                           f"Product {product['id']} has invalid image_url: {product['image_url']}")
+            self.assertTrue(product["model_image_url"].startswith("http"), 
+                           f"Product {product['id']} has invalid model_image_url: {product['model_image_url']}")
+        
+        print(f"✅ All {len(products)} products have valid image_url and model_image_url fields")
+        
+        # Test GET /api/products/featured endpoint
+        response = requests.get(f"{self.api_url}/products/featured")
+        self.assertEqual(response.status_code, 200)
+        featured_products = response.json()
+        self.assertGreater(len(featured_products), 0, "No featured products found")
+        
+        # Verify all featured products have both image fields
+        for product in featured_products:
+            self.assertIn("image_url", product, f"Featured product {product['id']} missing image_url field")
+            self.assertIn("model_image_url", product, f"Featured product {product['id']} missing model_image_url field")
+            
+            # Verify image URLs are not empty
+            self.assertTrue(product["image_url"], f"Featured product {product['id']} has empty image_url")
+            self.assertTrue(product["model_image_url"], f"Featured product {product['id']} has empty model_image_url")
+            
+            # Verify image URLs are valid URLs
+            self.assertTrue(product["image_url"].startswith("http"), 
+                           f"Featured product {product['id']} has invalid image_url: {product['image_url']}")
+            self.assertTrue(product["model_image_url"].startswith("http"), 
+                           f"Featured product {product['id']} has invalid model_image_url: {product['model_image_url']}")
+        
+        print(f"✅ All {len(featured_products)} featured products have valid image_url and model_image_url fields")
+        
+        # Verify sample data initialization includes model_image_url
+        response = requests.post(f"{self.api_url}/init-data")
+        self.assertEqual(response.status_code, 200)
+        
+        # Get all products again to verify sample data
+        response = requests.get(f"{self.api_url}/products")
+        self.assertEqual(response.status_code, 200)
+        products = response.json()
+        
+        # Check that all sample products have model_image_url
+        sample_products_with_model_images = sum(1 for p in products if "model_image_url" in p and p["model_image_url"])
+        self.assertEqual(sample_products_with_model_images, len(products), 
+                        f"Only {sample_products_with_model_images} out of {len(products)} sample products have model_image_url")
+        
+        print(f"✅ All {len(products)} sample products have model_image_url field")
+
 if __name__ == "__main__":
     print(f"Testing Premium Jewelry API at: {API_URL}")
     unittest.main(argv=['first-arg-is-ignored'], exit=False)

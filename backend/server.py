@@ -347,7 +347,7 @@ async def init_sample_data():
             "price": 950.00,
             "category": "Necklaces",
             "image_url": "https://images.unsplash.com/photo-1589128530085-7e772389eb7a",
-            "model_image_url": "https://images.pexels.com/photos/4621787/pexels-photo-4621787.jpeg",
+            "model_image_url": "https://images.pexels.com/photos/6153885/pexels-photo-6153885.jpeg",  # Model wearing the EXACT same Heart Pendant Necklace
             "material_details": {
                 "material": "Sterling Silver",
                 "gemstones": "None",

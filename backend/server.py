@@ -381,7 +381,7 @@ async def init_sample_data():
             "price": 2800.00,
             "category": "Wedding Rings",
             "image_url": "https://images.unsplash.com/photo-1717605877844-b506a1f5b914",
-            "model_image_url": "https://images.pexels.com/photos/6800935/pexels-photo-6800935.jpeg",
+            "model_image_url": "https://images.unsplash.com/photo-1623726564529-f07ede3b34be",  # Model wearing the EXACT same Wedding Ring Set
             "material_details": {
                 "material": "18k Gold",
                 "gemstones": "None",
